@@ -1,0 +1,64 @@
+h1 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 24px;
+	font-weight: normal;
+	color: #333333;
+	line-height: normal;
+	margin: 5px 0px;
+}
+
+h2, h3 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #333333;
+	line-height: normal;
+	margin: 5px 0px;
+}
+
+.content {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #333333;
+	line-height: 20px;
+	margin: 5px 0px;
+}
+
+.content a {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #f77f1e;
+	text-decoration: underline;
+}
+
+.content a:hover {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #f77f1e;
+	text-decoration: none;
+}
+
+.trigger .resellers {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #333333;
+	line-height: normal;
+	font-weight:bold;
+}
+
+.trigger .resellers a{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #333333;
+	line-height: normal;
+	text-decoration:underline;
+	font-weight:bold;
+}
+
+.trigger .resellers a:hover{
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	color: #333333;
+	line-height: normal;
+	text-decoration:none;
+	font-weight:bold;
+}
