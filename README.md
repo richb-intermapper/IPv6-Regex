@@ -13,4 +13,4 @@ The web page and CSS file that invoke the Javascript above.
 
 **test-ipv6-regex.pl**
 
-A perl program that tests the regex against almost 500 test cases.
+A perl program that tests the regex against almost 500 (included) test cases.
