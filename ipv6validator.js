@@ -2,6 +2,8 @@
 // present the "best text representation" according to IETF RFC 5952 at
 // http://tools.ietf.org/html/rfc5952
 
+// Global variables - Danger Will Robinson!
+var debugstr = "";	// a place to put debugging information
 
 // do the work of checking the string
 function checkipv6(str)
@@ -16,11 +18,12 @@ function checkipv6(str)
 function formatipv6field(str)
 {
 	var str, theAddress;
+	var pageItem;
 	
-	var pageItem = document.getElementById('ipv6text');			// retrieve the user's input field
+	pageItem = document.getElementById('ipv6text');				// retrieve the user's input field
 	theAddress = pageItem.value;
 	
-	str = formatipv6result(theAddress);							// retrieve the Good/Bad result string
+	str = formatipv6conclusion(theAddress);						// retrieve the Good/Bad string
 	pageItem = document.getElementById('ipv6results');
 	pageItem.innerHTML = str;									// and display it
 
@@ -29,8 +32,8 @@ function formatipv6field(str)
 	pageItem.innerHTML = str;									// and display it
 }
 
-// Print Good/Bad IPv6 Result
-function formatipv6result(str)
+// Print Good/Bad IPv6 Conclusion ("Good" or "Bad")
+function formatipv6conclusion(str)
 {
 var resultstr = "";
 var font =  'font-family:Arial, Verdana, Sans-serif;font-size:16px;';
@@ -51,9 +54,6 @@ var color = "";
 
 return resultstr;
 }
-
-// Global variables - Danger Will Robinson!
-var debugstr = "";	// a place to put debugging information
 
 // print the "preferred representation" of the IPv6 address
 function formatipv6preferred(theaddress)
@@ -90,7 +90,7 @@ function formatbestipv6(theaddress)
 		// ASSERT: the 'segments' array contains the segments of the address after splitting on ":"
 		// Trim off leading or trailing double-:: from front or back (:: or ::a:b:c... or ...a:b:c::)
 		trimcolonsfromends(segments);
-		// ASSERT: at this point segments[] has exactly zero or one "" string in it
+		// ASSERT: segments[] has exactly zero or one "" string that marks the position of the "::"
 			
 		// Find the empty segment (if any) resulting from "::"
 		// Fill it with enough "0000" segments to make a total of 8 segments
@@ -99,7 +99,6 @@ function formatbestipv6(theaddress)
 	
 		// Now strip off leading zero's from all segments
 		stripleadingzeroes(segments);
-		// ASSERT: at this point, all leading zeroes have been stripped off
 	
 		// Scan through looking for consecutive "0" segments
 		removeconsecutivezeroes(segments);
@@ -139,6 +138,7 @@ function trimcolonsfromends(segments)
 }
 
 // fillemptysegments - find the empty segment and fill with enough "0000" to make 8 segments
+// Only make seven segments if the last one has an IPv4 address (has a ".")
 function fillemptysegment(segments)
 {
 	var pos;
@@ -186,6 +186,7 @@ function stripleadingzeroes(segments)
 }
 
 // find longest sequence of zeroes and coalesce them into one segment
+// coalesce the left-most sequence if there's a tie of lengths
 function removeconsecutivezeroes(segments)
 {
 		var bestpos = -1;									// bestpos contains position of longest sequence
