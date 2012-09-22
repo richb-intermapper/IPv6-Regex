@@ -1,10 +1,6 @@
 // Javascript to test an IPv6 address for proper format, and to 
-// present the "best text representation" according to IETF Draft RFC at
-// http://tools.ietf.org/html/draft-ietf-6man-text-addr-representation-04
-
-// 8 Feb 2010 Rich Brown, Dartware, LLC
-// Please feel free to use this code as long as you provide a link to 
-// http://www.intermapper.com 
+// present the "best text representation" according to IETF RFC 5952 at
+// http://tools.ietf.org/html/rfc5952
 
 
 // do the work of checking the string
@@ -57,12 +53,6 @@ return resultstr;
 }
 
 // Global variables - Danger Will Robinson!
-//	"segments" holds the segments of the IPv6 address
-//	"totalsegments" holds number of segments
-//  "debugstr" holds assorted debugging information, normally ""
-
-var segments;		// the global array to hold the segments
-var totalsegments;	// assumed to be 8 unless the last is a IPv4 address, then seven
 var debugstr = "";	// a place to put debugging information
 
 // print the "preferred representation" of the IPv6 address
@@ -73,56 +63,58 @@ function formatipv6preferred(theaddress)
 		
 	beststr = formatbestipv6(theaddress);		
 
-	resultstr = resultstr + "<br /> Best representation: " + beststr;
+	resultstr = resultstr + "<b>Best representation:</b> " + beststr;
 	if (debugstr.length > 0)
-		{ resultstr = resultstr + "<br />" + debugstr; }
+		{ resultstr = resultstr + " <br /> Oops! Certain test cases failed. They include: <br />" + debugstr; }
 
 	return resultstr;
 }
 
+// formatbestipv6 - create the "best format" IPv6 address representation according to RFC 5952
+// Takes an IPv6 address and returns its best representation
+// If it is not a valid IPv6 address, returns "Not a valid IPvt6 address"
 function formatbestipv6(theaddress)
 {
 	var str;
-	var beststr = "Not valid IPv6 Address";
+	var beststr = "Not a valid IPv6 Address";
+	var segments;
+	var totalv6segments;
 	
 	if (checkipv6(theaddress))
 	{	
-		// ASSERT: theaddress is a well-formed IPv6 address, as a result of the checkipv6() call
+		// ASSERT: theaddress is now a well-formed IPv6 address, as a result of the checkipv6() call above
 		// Make the string lowercase and split it up on the ":"
 		str = theaddress.toLowerCase();
 		segments = str.split(":");
 		
-		// Trim off leading or trailing double-"" from front or back (:: or ::a:b:c... or a:b:c::)
-		trimcolonsfromends();
+		// ASSERT: the 'segments' array contains the segments of the address after splitting on ":"
+		// Trim off leading or trailing double-:: from front or back (:: or ::a:b:c... or ...a:b:c::)
+		trimcolonsfromends(segments);
 		// ASSERT: at this point segments[] has exactly zero or one "" string in it
+			
+		// Find the empty segment (if any) resulting from "::"
+		// Fill it with enough "0000" segments to make a total of 8 segments
+		fillemptysegment(segments);
+		// ASSERT: All non-empty entry have been expanded as necessary; if IPv4 address present, only 7 segments
 	
-		// Check for IPv4 in the final segment. This affects the total number of segment expected; 
-		// If IPv4 is present, then only 7 segments; otherwise there'll be 8
-		totalsegments = adjustsegmentsforipv4();
-		
-		// Fill in empty segments
-		// Scan to see if there are any empty segments (resulting from "::")
-		// fill them with "0000"
-		fillemptysegments();
-		// ASSERT: There are exactly *totalsegments* segments, with original (non-empty) entry, or "0000"
-	
-		// Now strip off leading zero's from all entries
-		stripleadingzeroes();
+		// Now strip off leading zero's from all segments
+		stripleadingzeroes(segments);
 		// ASSERT: at this point, all leading zeroes have been stripped off
 	
 		// Scan through looking for consecutive "0" segments
-		removeconsecutivezeroes();
+		removeconsecutivezeroes(segments);
 		
 		// debugstr = debugstr + "-----<br />" + printsegments();
 		
 		// Assemble best representation from remainder of segments
-		beststr = assemblebestrepresentation();
+		beststr = assemblebestrepresentation(segments);
+		
 	}
 	return beststr;
 }
 
 // printsegments - return each of the actual segments, one per line for debugging. 
-function printsegments()
+function printsegments(segments)
 {
 	var resultstr = "";
 	for (i=0;i<segments.length; i++)
@@ -132,58 +124,54 @@ function printsegments()
 	return resultstr;
 }
 
-// Trim off leading or trailing double-"" from front or back (:: or ::a:b:c... or a:b:c::)
-function trimcolonsfromends()
+// Trim off leading or trailing double-:: from front or back (:: or ::a:b:c... or a:b:c::)
+function trimcolonsfromends(segments)
 {
 	var seglen = segments.length;
-	if ((segments[0] == '') && (segments[1] == '') && (segments[2] == "")) // must have been ::
-		{ segments.shift(); segments.shift() }							//    remove first two items
-	else if ((segments[0] == '') && (segments[1] == ''))				// must have been ::xxxx
-		{ segments.shift(); }											//    remove the first item
-	else if ((segments[seglen-1] == '') && (segments[seglen-2] == '')) 	// must have been xxxx::
-		{ segments.pop(); }												//    remove the last item	
+	if ((segments[0] == '') && (segments[1] == '') && (segments[2] == "")) 	// must have been "::"
+		{ segments.shift(); segments.shift() }								//    remove first two items
+																			//    leaving a single segment of ""
+	else if ((segments[0] == '') && (segments[1] == ''))					// must have been ::xxxx...
+		{ segments.shift(); }												//    remove the first item
+	else if ((segments[seglen-1] == '') && (segments[seglen-2] == '')) 		// must have been xxxx::
+		{ segments.pop(); }													//    remove the last item	
 	// ASSERT: at this point segments[] has exactly zero or one "" string in it
 }
 
-// adjust number of segments - if IPv4 address present, there really are only seven segments
-function adjustsegmentsforipv4()
-{
-	var numsegments = 8;
-	if (segments[segments.length-1].indexOf(".") != -1)                  // found a "." which means IPv4
-	{
-		// alert ("only seven segments");
-		numsegments = 7;
-	}
-	return numsegments;
-}
-
-// fillemptysegments - find all the empty segments and fill them with "0000"
-function fillemptysegments()
+// fillemptysegments - find the empty segment and fill with enough "0000" to make 8 segments
+function fillemptysegment(segments)
 {
 	var pos;
-	for (pos=0; pos<segments.length; pos++)								// scan to find position of the ""
+	var maxsegments = 8; 							// normally 8 segments
+	
+	if (segments[segments.length-1].indexOf(".") != -1) // found a "." which means IPv4
+	{												// IPv4 addresses take up two segments
+		// alert ("only seven segments");
+		maxsegments = 7;
+	}
+	for (pos=0; pos<maxsegments; pos++)				// scan to find position of the ""
 	{
-		if (segments[pos] == '') { break; }
+		if (segments[pos] == '') { 
+			segments[pos] = "0";					// Fill the empty segment with "0"				
+			break; 
+		}
 	}
 	// alert(pos.toString());
-	
-	// Now splice in enough "0000" entries in the array to flesh it out to totalsegments entries
 
-	if (pos < totalsegments)
+	// Now splice in enough "0000" entries in the array to flesh it out to right number
+	while (segments.length < maxsegments)			// if it's not long enough
 	{
-		segments.splice(pos, 1, "0000");				// Replace the "" with "0000"
-		while (segments.length < totalsegments)			// if it's not long enough
-		{
-			segments.splice(pos, 0, "0000");			// insert one more "0000"
-		}
+		segments.splice(pos, 0, "0");				// insert one more "0" at this position
 	}
 }
 
 // strip leading zeroes from every segment
-function stripleadingzeroes()
+function stripleadingzeroes(segments)
 {
-	var segs;
-	for (i=0; i<totalsegments; i++)						// for each of the segments
+	var numsegs = segments.length;
+	var segment;
+	
+	for (i=0; i<numsegs; i++)							// for each of the segments
 	{
 		segs=segments[i].split("");						// split the segment apart
 		for (j=0; j<3 ; j++)							// scan through at most three characters 
@@ -198,7 +186,7 @@ function stripleadingzeroes()
 }
 
 // find longest sequence of zeroes and coalesce them into one segment
-function removeconsecutivezeroes()
+function removeconsecutivezeroes(segments)
 {
 		var bestpos = -1;									// bestpos contains position of longest sequence
 		var bestcnt = 0;									// bestcnt contains the number of occurrences
@@ -207,7 +195,7 @@ function removeconsecutivezeroes()
 		var curpos = -1;
 		var i;
 		
-		for (i=0; i<totalsegments; i++)
+		for (i=0; i<8; i++)
 		{
 			// alert (i.toString() + " " + inzeroes.toString() + " " + bestpos.toString() + " " + bestcnt.toString() + " ");
 			if (inzeroes)									// we're in a run of zero segments
@@ -241,7 +229,7 @@ function removeconsecutivezeroes()
 }
 
 // Assemble best representation of the string
-function assemblebestrepresentation()
+function assemblebestrepresentation(segments)
 {
 	var beststr = "";
 	var segslen = segments.length;
@@ -371,7 +359,7 @@ function sprintf()
  	var bestrep;
  	var lcstr;
  	
- 	return; 					// Just return for production - too slow
+// 	return; 					// Just return for production - too slow
  	if (checkipv6(str) && sbok) 
  	{
  		// it's OK - both return true
@@ -391,7 +379,7 @@ function sprintf()
  	lcstr = beststr.toLowerCase();	// the lower-case representation of the test case
  	if (sbok && (lcstr != bestrep))	// if it should be well formatted, is it correct?
  	{
- 		debugstr = debugstr + "<br />'" + lcstr + "'<br />'" + bestrep + "'<br />";
+ 		debugstr = debugstr + "<br /> Test string: '" + lcstr + "'<br /> Best rep: '" + bestrep + "'<br />";
  	}
  	
  }
@@ -460,8 +448,10 @@ function sprintf()
 	XTEST(true ,"1:2:3::7:8","1:2:3::7:8"); 
 	XTEST(true ,"1:2::7:8","1:2::7:8"); 
 	XTEST(true ,"1::7:8","1::7:8"); 
+	XTEST(false,"1:2:3:4:5:6:7:1.2.3.4","---"); // IPv4 addresses take 32 bits/2 segments
 	XTEST(true ,"1:2:3:4:5:6:1.2.3.4","1:2:3:4:5:6:1.2.3.4"); 
-	XTEST(true ,"1:2:3:4:5::1.2.3.4","1:2:3:4:5:0:1.2.3.4"); 
+	XTEST(true ,"1:2:3:4:5:0:1.2.3.4","1:2:3:4:5:0:1.2.3.4"); 
+	XTEST(true ,"1:2:3:4:5::1.2.3.4", "1:2:3:4:5:0:1.2.3.4"); 
 	XTEST(true ,"1:2:3:4::1.2.3.4","1:2:3:4::1.2.3.4"); 
 	XTEST(true ,"1:2:3::1.2.3.4","1:2:3::1.2.3.4"); 
 	XTEST(true ,"1:2::1.2.3.4","1:2::1.2.3.4"); 
