@@ -4,7 +4,7 @@ This repository documents a regular expression (regex) that checks an IPv6 addre
 
 ##IPv6 Regular Expression and Validator
 
-The Javascript tests an IPv6 address according to an elaborate regular expression (RE, or regex) for validation that the address is the proper format. This regular expression is discussed further in the InterMapper [Knowledge Base article](http://forums.dartware.com/viewtopic.php?t=452) which also includes a number of test cases. 
+The Javascript tests an IPv6 address according to an elaborate regular expression (RE, or regex) to validate that the address is the proper format. This regular expression is discussed further in the [InterMapper Knowledge Base article.](http://forums.intermapper.com/viewtopic.php?t=452)
 
 The Javascript file includes a number of test cases that were used during development. Please let us know <support@intermapper.com> if you find interesting test cases. 
 
@@ -14,18 +14,34 @@ IETF RFC5952 [A Recommendation for IPv6 Address Text Representation](http://tool
 
 ##Source Files in this Repository
 
-**IPv6AddressValidator.html** and
-**mibprobebuilder.css**
+**IPv6AddressValidator.html** 
 
-These two files provide a stand-alone web page (runs from the local disk; no web server required) that has an input field to enter an IPv6 address. The script checks the IPv6 address against the regex to determine if it's the proper format. It also displays the "best representation" for that IPv6 address.
+A stand-alone web page that has an input field to enter an IPv6 address. The script checks the IPv6 address against the regex to determine if it's the proper format. It also displays the "best representation" for that IPv6 address.
+
+To use this page, simply load the file IPv6AddressValidator.html into your browser, enter an IPv6 address and hit Tab/Return.
 
 **ipv6validator.js**
 
-A Javascript program that works with the files above to test an IPv6 address for validity, and to produce its best representation.
+This Javascript does the work of testing an IPv6 address for validity, and producing its best representation. It is incorporated into the IPv6AddressValidator.html page.
+
+**mibprobebuilder.css**
+
+A CSS file pulled into the IPv6AddressValidator.html page.
 
 **test-ipv6-regex.pl**
 
-This Perl test script has nearly 500 test cases of valid and invalid IPv6 addresses. You can use them to test your own implementation. In addition it has pointers to several other regular expressions that can be used for IPv6.
+This Perl test script has nearly 500 test cases of valid and invalid IPv6 addresses. You can use them to test your own implementation of an IPv6 regex. 
+
+##Other IPv6 Regular Expressions
+
+This project draws together a lot of knowledge from various people who have ventured into creating an IPv6 Regex. Thanks to the following:
+
+* Stephen Ryan for starting this project <http://forums.intermapper.com/viewtopic.php?t=452>
+* Christoph Petschnig for a Ruby implementation of the same  <http://gist.github.com/294476>
+* Aeron for a shorter RE, and for Java and Ruby RE's. NB The RE does not ignore whitespace before or after the IPv6 address.
+* Phil Pennock who submitted a RE generated automatically from the full grammar in RFC3986 <http://people.spodhuis.org/phil.pennock/software/emit_ipv6_regexp-0.304>
+* Salvador Fandiño García who provides the CPAN module Regexp::IPv6 at <http://search.cpan.org/~salva/Regexp-IPv6-0.03/lib/Regexp/IPv6.pm>
+
 
 ##License
 
