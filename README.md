@@ -6,7 +6,7 @@ This repository documents a regular expression (regex) that checks an IPv6 addre
 
 The Javascript tests an IPv6 address according to an elaborate regular expression (RE, or regex) to validate that the address is the proper format. This regular expression is discussed further in the [InterMapper Knowledge Base article.](http://forums.intermapper.com/viewtopic.php?t=452)
 
-The Javascript file includes a number of test cases that were used during development. Please let us know <support@intermapper.com> if you find interesting test cases. 
+The Javascript file includes a number of test cases that were used during development. Please let us know at <support@intermapper.com> if you find new interesting test cases. 
 
 ##Best Text Representation of IPv6 Address
 
